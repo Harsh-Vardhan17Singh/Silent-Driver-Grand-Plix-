@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html class="dark" lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <title>Race Radio Analyzer | The Silent Co-Driver</title>
+  <meta name="description" content="AI-driven race radio transcription, driver stress detection, and audio telemetry correlation.">
+  <link href="https://fonts.googleapis.com" rel="preconnect"/>
+  <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700;800&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "surface": "#131313",
+            "surface-dim": "#131313",
+            "surface-bright": "#3a3939",
+            "surface-container-lowest": "#0e0e0e",
+            "surface-container-low": "#1c1b1b",
+            "surface-container": "#201f1f",
+            "surface-container-high": "#2a2a2a",
+            "surface-container-highest": "#353534",
+            "on-surface": "#e5e2e1",
+            "on-surface-variant": "#e9bcb5",
+            "primary": "#ffb4a8",
+            "primary-container": "#e10600",
+            "secondary": "#41f03e",
+            "secondary-fixed": "#75ff67",
+            "secondary-fixed-dim": "#30e532",
+            "tertiary": "#ffba20",
+            "outline": "#af8781",
+            "outline-variant": "#5e3f3a",
+            "background": "#131313"
+          },
+          fontFamily: {
+            "body-base": ["Inter", "sans-serif"],
+            "data-sm": ["JetBrains Mono", "monospace"],
+            "data-lg": ["JetBrains Mono", "monospace"],
+            "display-lg": ["Inter", "sans-serif"],
+            "label-caps": ["Inter", "sans-serif"],
+            "headline-md": ["Inter", "sans-serif"]
+          },
+          spacing: {
+            "unit": "4px",
+            "gutter": "16px",
+            "margin": "24px",
+            "panel-padding": "12px"
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body {
+      background-color: #0A0A0A;
+      color: #e5e2e1;
+      font-family: 'Inter', sans-serif;
+      overflow-x: hidden;
+    }
+    .hud-border { border: 1px solid #252525; }
+    .hud-border-active { border: 1px solid #E10600; box-shadow: 0 0 12px rgba(225, 6, 0, 0.35); }
+    .hud-glass { background-color: rgba(22, 22, 22, 0.85); backdrop-filter: blur(12px); }
+
+    .scanline {
+      width: 100%;
+      height: 80px;
+      z-index: 10;
+      position: absolute;
+      pointer-events: none;
+      background: linear-gradient(0deg, rgba(0,0,0,0) 0%, rgba(225,6,0,0.15) 50%, rgba(0,0,0,0) 100%);
+      opacity: 0.2;
+      animation: scanline 8s linear infinite;
+    }
+    @keyframes scanline {
+      0% { transform: translateY(-100%); }
+      100% { transform: translateY(100vh); }
+    }
+
+    .waveform-bar {
+      width: 4px;
+      background-color: #ffb4a8;
+      border-radius: 2px;
+      animation: pulseWave 1.5s ease-in-out infinite;
+    }
+    @keyframes pulseWave {
+      0%, 100% { transform: scaleY(0.2); opacity: 0.4; }
+      50% { transform: scaleY(1); opacity: 1; }
+    }
+
+    .glitch-title {
+      position: relative;
+      text-shadow: 0 0 12px rgba(225,6,0,0.3);
+    }
+
+    ::-webkit-scrollbar { width: 4px; height: 4px; }
+    ::-webkit-scrollbar-track { background: #0e0e0e; }
+    ::-webkit-scrollbar-thumb { background: #353534; }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col pt-16 md:pl-64 antialiased selection:bg-primary-container selection:text-white relative">
+  <div class="scanline"></div>
+
+  <!-- Top Navigation Bar -->
+  <nav class="bg-surface-container-lowest border-b border-outline-variant/30 backdrop-blur-xl fixed top-0 left-0 w-full z-50 flex justify-between items-center px-6 h-16 text-primary">
+    <div class="flex items-center gap-6">
+      <a href="index.html" class="flex items-center gap-2 text-white hover:text-primary transition-colors">
+        <span class="w-3 h-3 rounded-full bg-primary-container shadow-[0_0_8px_#e10600] animate-pulse"></span>
+        <span class="font-display-lg text-lg md:text-xl font-black tracking-tighter text-white">THE SILENT CO-DRIVER</span>
+      </a>
+      <div class="h-6 w-px bg-[#252525] hidden lg:block"></div>
+      <ul class="hidden lg:flex gap-6 items-center font-label-caps text-xs font-bold tracking-wider">
+        <li><a class="text-on-surface-variant hover:text-white transition-colors" href="index.html">LIVE COCKPIT</a></li>
+        <li><a class="text-on-surface-variant hover:text-white transition-colors" href="lap_correlation.html">LAP CORRELATION</a></li>
+        <li><a class="text-primary border-b-2 border-primary-container pb-1" href="race_radio.html">RADIO ANALYZER</a></li>
+        <li><a class="text-on-surface-variant hover:text-white transition-colors" href="analysis_result.html">ANALYSIS RESULT</a></li>
+      </ul>
+    </div>
+    <div class="flex items-center gap-4">
+      <div class="hidden sm:flex items-center gap-2 bg-[#0e0e0e] border border-[#252525] px-3 py-1 text-xs font-mono text-primary">
+        <span class="w-2 h-2 rounded-full bg-primary-container animate-pulse"></span>
+        AUDIO INTERCEPT READY
+      </div>
+      <a href="index.html" class="bg-primary-container hover:bg-red-700 text-white text-xs font-bold px-3 py-1.5 rounded transition-all uppercase flex items-center gap-1">
+        <span class="material-symbols-outlined text-[16px]">speed</span> LIVE HUD
+      </a>
+    </div>
+  </nav>
+
+  <!-- Side Navigation Bar -->
+  <aside class="hidden md:flex bg-surface-container border-r border-outline-variant/20 fixed left-0 top-0 h-full z-40 flex-col pt-16 w-64">
+    <div class="p-4 border-b border-outline-variant/20 flex items-center gap-3">
+      <div class="w-2.5 h-2.5 rounded-full bg-primary shadow-[0_0_8px_#ffb4a8] animate-pulse"></div>
+      <div>
+        <div class="font-label-caps text-[11px] font-bold text-on-surface tracking-wider">RADIO WORKSTATION</div>
+        <div class="font-data-sm text-[10px] text-primary tracking-widest">INGEST v4.8</div>
+      </div>
+    </div>
+    
+    <nav class="flex-1 mt-4">
+      <ul class="flex flex-col">
+        <li>
+          <a class="text-on-surface-variant hover:bg-surface-bright px-4 py-3 flex items-center gap-3 transition-all" href="index.html">
+            <span class="material-symbols-outlined text-[18px]">speed</span>
+            <span class="font-label-caps text-xs font-bold">Live Cockpit</span>
+          </a>
+        </li>
+        <li>
+          <a class="text-on-surface-variant hover:bg-surface-bright px-4 py-3 flex items-center gap-3 transition-all" href="lap_correlation.html">
+            <span class="material-symbols-outlined text-[18px]">timeline</span>
+            <span class="font-label-caps text-xs font-bold">Lap Correlation</span>
+          </a>
+        </li>
+        <li>
+          <a class="bg-primary-container text-white border-l-4 border-primary px-4 py-3 flex items-center gap-3 transition-all" href="race_radio.html">
+            <span class="material-symbols-outlined text-[18px]">radio</span>
+            <span class="font-label-caps text-xs font-bold">Radio Ingest</span>
+          </a>
+        </li>
+        <li>
+          <a class="text-on-surface-variant hover:bg-surface-bright px-4 py-3 flex items-center gap-3 transition-all" href="analysis_result.html">
+            <span class="material-symbols-outlined text-[18px]">analytics</span>
+            <span class="font-label-caps text-xs font-bold">Analysis Debrief</span>
+          </a>
+        </li>
+      </ul>
+    </nav>
+
+    <div class="mt-auto p-4 border-t border-outline-variant/20">
+      <div class="bg-[#0e0e0e] border border-[#252525] p-3 rounded text-xs flex flex-col gap-1 font-mono text-gray-400">
+        <span class="text-white font-bold mb-1">VOICE PIPELINE</span>
+        <div class="flex justify-between"><span>MODELS:</span> <strong class="text-secondary">WHISPER v3</strong></div>
+        <div class="flex justify-between"><span>TONE AI:</span> <strong class="text-primary">EMO-NET 2.4</strong></div>
+        <div class="flex justify-between"><span>SAMPLE:</span> <strong class="text-white">48 kHz WAV</strong></div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main Workstation Canvas -->
+  <main class="flex-1 p-4 md:p-8 bg-background">
+    <!-- Hero Section -->
+    <section class="mb-8 max-w-4xl">
+      <div class="flex items-center gap-2 mb-2">
+        <span class="text-primary-container text-xs font-mono font-bold">[INGESTION & ACOUSTIC TELEMETRY]</span>
+        <span class="text-xs bg-[#1a1a1a] border border-[#333] px-2 py-0.5 rounded text-gray-300 font-mono">CH-1 INTERCEPT</span>
+      </div>
+      <h1 class="font-headline-md text-3xl md:text-4xl font-extrabold text-white tracking-tight uppercase glitch-title">
+        Turn Race Radio Into Race Intelligence.
+      </h1>
+      <p class="text-gray-400 text-sm mt-2 max-w-2xl border-l-2 border-primary-container pl-4 py-1">
+        Analyze driver communications in real time, extract psychological stress triggers, and correlate voice acoustic parameters directly with corner telemetry deltas.
+      </p>
+    </section>
+
+    <!-- Workstation Grid -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+      
+      <!-- Left Column: Input & Upload (7 Cols) -->
+      <div class="lg:col-span-7 flex flex-col gap-6">
+        
+        <!-- Audio File Dropzone -->
+        <div class="hud-border hud-glass p-1">
+          <div class="h-1.5 w-full bg-[#201f1f] mb-1">
+            <div class="h-full w-20 bg-primary-container"></div>
+          </div>
+          <div class="p-4">
+            <div class="flex justify-between items-end mb-4 border-b border-[#252525] pb-2">
+              <span class="font-label-caps text-xs font-bold text-gray-400 uppercase">TELEMETRY AUDIO INGEST</span>
+              <span class="font-mono text-xs text-primary-container font-bold">AUDIO_SRC: WAV / MP3 / FLAC</span>
+            </div>
+            
+            <div id="drop-zone" class="border-2 border-dashed border-[#333] hover:border-primary-container transition-colors bg-[#0e0e0e] h-52 flex flex-col items-center justify-center cursor-pointer group relative overflow-hidden rounded">
+              <input type="file" id="file-input" class="hidden" accept="audio/*">
+              <div class="absolute inset-0 bg-primary-container/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+              <span class="material-symbols-outlined text-5xl text-gray-400 group-hover:text-primary-container mb-2 transition-colors">upload_file</span>
+              <p class="text-white font-bold text-sm" id="drop-label">Drop .WAV race radio recording here</p>
+              <p class="font-mono text-xs text-gray-500 mt-2">or <span class="text-primary underline">browse local files</span></p>
+              <span class="mt-3 text-[10px] font-mono text-gray-600 bg-[#161616] px-2 py-0.5 border border-[#252525] rounded">PRESET: SPA_L7_RADIO_CALLOUT.WAV</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Live Radio Intercept Simulator -->
+        <div class="hud-border hud-glass p-1">
+          <div class="p-4">
+            <div class="flex justify-between items-center mb-3">
+              <span class="font-label-caps text-xs font-bold text-gray-400 uppercase">LIVE RADIO INTERCEPT (SIMULATED RECORDING)</span>
+              <span class="font-mono text-[10px] text-secondary" id="rec-status">STANDBY</span>
+            </div>
+            <div class="flex flex-col sm:flex-row gap-4 items-center bg-[#0c0c0c] p-4 border border-[#252525] rounded">
+              <!-- Controls -->
+              <div class="flex gap-2">
+                <button id="btn-record" class="h-12 w-12 rounded bg-[#201f1f] hover:bg-primary-container border border-[#333] hover:border-primary-container transition-all flex items-center justify-center text-white group" title="Start Recording">
+                  <span class="material-symbols-outlined text-primary-container group-hover:text-white group-hover:animate-pulse">fiber_manual_record</span>
+                </button>
+                <button id="btn-stop-rec" class="h-12 w-12 rounded bg-[#201f1f] hover:bg-[#333] border border-[#333] transition-all flex items-center justify-center text-white" title="Stop Recording">
+                  <span class="material-symbols-outlined text-gray-400">stop</span>
+                </button>
+              </div>
+
+              <!-- Animated Waveform Bars -->
+              <div class="flex-1 w-full h-12 flex items-center gap-1.5 justify-center px-4 overflow-hidden border-l border-[#252525]" id="rec-waveform">
+                <div class="waveform-bar" style="height: 40%; animation-delay: 0.1s;"></div>
+                <div class="waveform-bar" style="height: 80%; animation-delay: 0.3s;"></div>
+                <div class="waveform-bar" style="height: 35%; animation-delay: 0.2s;"></div>
+                <div class="waveform-bar" style="height: 95%; animation-delay: 0.5s;"></div>
+                <div class="waveform-bar" style="height: 50%; animation-delay: 0.15s;"></div>
+                <div class="waveform-bar" style="height: 100%; animation-delay: 0.4s;"></div>
+                <div class="waveform-bar" style="height: 60%; animation-delay: 0.25s;"></div>
+                <div class="waveform-bar" style="height: 85%; animation-delay: 0.6s;"></div>
+                <div class="waveform-bar" style="height: 30%; animation-delay: 0.1s;"></div>
+                <div class="waveform-bar" style="height: 70%; animation-delay: 0.35s;"></div>
+              </div>
+
+              <!-- Timer -->
+              <div class="font-mono text-xl font-bold text-primary min-w-[90px] text-right" id="rec-timer">
+                00:04.82
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Right Column: Metadata & Action (5 Cols) -->
+      <div class="lg:col-span-5 flex flex-col gap-6">
+        <div class="hud-border hud-glass p-1">
+          <div class="h-1.5 w-full bg-[#201f1f] mb-1">
+            <div class="h-full w-1/3 bg-tertiary"></div>
+          </div>
+          <div class="p-4">
+            <span class="font-label-caps text-xs font-bold text-gray-400 mb-4 block border-b border-[#252525] pb-2 uppercase tracking-wider">SESSION METADATA</span>
+            
+            <form id="radio-meta-form" class="space-y-4" onsubmit="event.preventDefault(); triggerAnalysis();">
+              <div>
+                <label class="font-mono text-xs text-gray-400 block mb-1 uppercase">Driver Name / Identifier</label>
+                <input id="input-driver" class="w-full bg-[#0e0e0e] border border-[#252525] text-white font-mono text-sm p-3 focus:ring-1 focus:ring-primary-container focus:border-primary-container outline-none rounded" value="Charles Leclerc (CAR #16)" type="text"/>
+              </div>
+              
+              <div class="grid grid-cols-2 gap-3">
+                <div>
+                  <label class="font-mono text-xs text-gray-400 block mb-1 uppercase">Lap Number</label>
+                  <input id="input-lap" class="w-full bg-[#0e0e0e] border border-[#252525] text-white font-mono text-sm p-3 focus:ring-1 focus:ring-primary-container focus:border-primary-container outline-none rounded" value="7" type="number"/>
+                </div>
+                <div>
+                  <label class="font-mono text-xs text-gray-400 block mb-1 uppercase">Session Type</label>
+                  <select class="w-full bg-[#0e0e0e] border border-[#252525] text-white font-mono text-sm p-3 focus:ring-1 focus:ring-primary-container outline-none rounded">
+                    <option>RACE STINT 3</option>
+                    <option>QUALIFYING Q3</option>
+                    <option>PRACTICE FP2</option>
+                  </select>
+                </div>
+              </div>
+
+              <div>
+                <label class="font-mono text-xs text-gray-400 block mb-1 uppercase">Radio Channel</label>
+                <input class="w-full bg-[#0e0e0e] border border-[#252525] text-white font-mono text-sm p-3 focus:ring-1 focus:ring-primary-container outline-none rounded" value="TEAM_RADIO_CH_01 // SECURE" type="text" readonly/>
+              </div>
+
+              <!-- CTA Button -->
+              <button type="submit" id="btn-analyze" class="w-full mt-4 bg-primary-container hover:bg-red-700 text-white font-headline-md text-base py-4 px-4 uppercase tracking-wider transition-all flex items-center justify-center gap-3 rounded group relative overflow-hidden font-bold shadow-[0_0_15px_rgba(225,6,0,0.4)]">
+                <span class="relative z-10">ANALYZE RACE RADIO</span>
+                <span class="material-symbols-outlined relative z-10 group-hover:translate-x-1 transition-transform">arrow_forward_ios</span>
+              </button>
+            </form>
+          </div>
+        </div>
+
+        <!-- Processing Sequence Modal / Overlay State -->
+        <div id="processing-box" class="hud-border hud-glass p-1 hidden">
+          <div class="p-4">
+            <div class="flex justify-between items-center mb-4">
+              <span class="font-label-caps text-xs font-bold text-primary-container animate-pulse flex items-center gap-1.5">
+                <span class="w-2 h-2 rounded-full bg-primary-container animate-ping"></span>
+                AI PROCESSING SEQUENCE ACTIVE
+              </span>
+              <span class="font-mono text-xs text-tertiary" id="proc-pct">35%</span>
+            </div>
+            
+            <div class="space-y-4 font-mono text-xs">
+              <!-- Step 1 -->
+              <div>
+                <div class="flex justify-between mb-1.5 text-gray-300">
+                  <span id="step1-lbl">TRANSCRIBING AUDIO (WHISPER AI)...</span>
+                  <span class="text-secondary" id="step1-val">100%</span>
+                </div>
+                <div class="w-full h-2 bg-[#0e0e0e] border border-[#252525] flex gap-1 p-[1px]">
+                  <div class="h-full bg-secondary w-full" id="bar-step1"></div>
+                </div>
+              </div>
+
+              <!-- Step 2 -->
+              <div>
+                <div class="flex justify-between mb-1.5 text-gray-300">
+                  <span id="step2-lbl" class="animate-pulse text-white">ANALYZING DRIVER TONE & STRESS INDEX...</span>
+                  <span class="text-tertiary" id="step2-val">87%</span>
+                </div>
+                <div class="w-full h-2 bg-[#0e0e0e] border border-[#252525] flex gap-1 p-[1px]">
+                  <div class="h-full bg-tertiary transition-all duration-300" id="bar-step2" style="width: 87%;"></div>
+                </div>
+              </div>
+
+              <!-- Step 3 -->
+              <div>
+                <div class="flex justify-between mb-1.5 text-gray-500">
+                  <span id="step3-lbl">CORRELATING RACE TELEMETRY DELTAS...</span>
+                  <span id="step3-val">PENDING</span>
+                </div>
+                <div class="w-full h-2 bg-[#0e0e0e] border border-[#252525] flex gap-1 p-[1px]">
+                  <div class="h-full bg-primary-container transition-all duration-300" id="bar-step3" style="width: 0%;"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- Quick Audio Transcript Sample Previews -->
+    <section class="mt-8 border-t border-[#252525] pt-6">
+      <h3 class="font-label-caps text-xs font-bold text-gray-400 mb-4 uppercase tracking-wider">SAVED TELEMETRY RADIO SAMPLES (CLICK TO LOAD & ANALYZE)</h3>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        
+        <div class="bg-[#141414] border border-[#252525] hover:border-primary-container p-3 rounded cursor-pointer transition-all sample-card" data-driver="Charles Leclerc" data-lap="7" data-text="Box box box, tires are gone">
+          <div class="flex justify-between text-xs font-mono mb-1">
+            <span class="text-white font-bold">SPA // LAP 07</span>
+            <span class="text-primary-container font-bold">STRESS HIGH (87%)</span>
+          </div>
+          <p class="text-xs text-gray-300 italic font-serif">"Box box box, tires are gone. Rear is stepping out."</p>
+        </div>
+
+        <div class="bg-[#141414] border border-[#252525] hover:border-tertiary p-3 rounded cursor-pointer transition-all sample-card" data-driver="Charles Leclerc" data-lap="4" data-text="Temps getting high on FL">
+          <div class="flex justify-between text-xs font-mono mb-1">
+            <span class="text-white font-bold">SPA // LAP 04</span>
+            <span class="text-tertiary font-bold">TIRED (62%)</span>
+          </div>
+          <p class="text-xs text-gray-300 italic font-serif">"Front left temp climbing to 114°C, backing off slightly."</p>
+        </div>
+
+        <div class="bg-[#141414] border border-[#252525] hover:border-secondary p-3 rounded cursor-pointer transition-all sample-card" data-driver="Charles Leclerc" data-lap="2" data-text="Car feels good">
+          <div class="flex justify-between text-xs font-mono mb-1">
+            <span class="text-white font-bold">SPA // LAP 02</span>
+            <span class="text-secondary font-bold">CALM (94%)</span>
+          </div>
+          <p class="text-xs text-gray-300 italic font-serif">"Car feels good and balanced. Target delta green."</p>
+        </div>
+
+      </div>
+    </section>
+
+  </main>
+
+  <script>
+    // Audio Dropzone & Interactivity Script
+    const dropZone = document.getElementById('drop-zone');
+    const fileInput = document.getElementById('file-input');
+    const dropLabel = document.getElementById('drop-label');
+
+    dropZone.addEventListener('click', () => fileInput.click());
+    fileInput.addEventListener('change', (e) => {
+      if (e.target.files.length > 0) {
+        dropLabel.textContent = `Loaded: ${e.target.files[0].name}`;
+        dropZone.classList.add('border-secondary');
+      }
+    });
+
+    dropZone.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      dropZone.classList.add('border-primary-container');
+    });
+
+    dropZone.addEventListener('dragleave', () => {
+      dropZone.classList.remove('border-primary-container');
+    });
+
+    dropZone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      if (e.dataTransfer.files.length > 0) {
+        dropLabel.textContent = `Loaded: ${e.dataTransfer.files[0].name}`;
+        dropZone.classList.add('border-secondary');
+      }
+    });
+
+    // Sample clickers
+    document.querySelectorAll('.sample-card').forEach(card => {
+      card.addEventListener('click', () => {
+        document.getElementById('input-driver').value = card.getAttribute('data-driver');
+        document.getElementById('input-lap').value = card.getAttribute('data-lap');
+        triggerAnalysis();
+      });
+    });
+
+    function triggerAnalysis() {
+      const procBox = document.getElementById('processing-box');
+      procBox.classList.remove('hidden');
+      procBox.scrollIntoView({ behavior: 'smooth' });
+
+      const bar2 = document.getElementById('bar-step2');
+      const bar3 = document.getElementById('bar-step3');
+      const procPct = document.getElementById('proc-pct');
+      const step3Val = document.getElementById('step3-val');
+
+      let pct = 35;
+      const interval = setInterval(() => {
+        pct += 15;
+        if (pct >= 100) {
+          pct = 100;
+          clearInterval(interval);
+          bar3.style.width = '100%';
+          step3Val.textContent = '100%';
+          step3Val.className = 'text-secondary';
+          procPct.textContent = '100% COMPLETE';
+          setTimeout(() => {
+            window.location.href = 'analysis_result.html';
+          }, 800);
+        }
+        procPct.textContent = `${pct}%`;
+        if (pct > 60) {
+          bar3.style.width = `${pct - 40}%`;
+          step3Val.textContent = `${pct - 40}%`;
+        }
+      }, 300);
+    }
+  </script>
+</body>
+</html>

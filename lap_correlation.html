@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html class="dark" lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <title>Lap Correlation Dashboard | The Silent Co-Driver</title>
+  <meta name="description" content="Race session lap time vs driver stress correlation analytics dashboard.">
+  <link href="https://fonts.googleapis.com" rel="preconnect"/>
+  <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700;800&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "surface": "#131313",
+            "surface-dim": "#131313",
+            "surface-bright": "#3a3939",
+            "surface-container-lowest": "#0e0e0e",
+            "surface-container-low": "#1c1b1b",
+            "surface-container": "#201f1f",
+            "surface-container-high": "#2a2a2a",
+            "surface-container-highest": "#353534",
+            "on-surface": "#e5e2e1",
+            "on-surface-variant": "#e9bcb5",
+            "primary": "#ffb4a8",
+            "primary-container": "#e10600",
+            "secondary": "#41f03e",
+            "secondary-fixed": "#75ff67",
+            "secondary-fixed-dim": "#30e532",
+            "tertiary": "#ffba20",
+            "outline": "#af8781",
+            "outline-variant": "#5e3f3a",
+            "background": "#131313"
+          },
+          fontFamily: {
+            "body-base": ["Inter", "sans-serif"],
+            "data-sm": ["JetBrains Mono", "monospace"],
+            "data-lg": ["JetBrains Mono", "monospace"],
+            "display-lg": ["Inter", "sans-serif"],
+            "label-caps": ["Inter", "sans-serif"],
+            "headline-md": ["Inter", "sans-serif"]
+          },
+          spacing: {
+            "unit": "4px",
+            "gutter": "16px",
+            "margin": "24px",
+            "panel-padding": "12px"
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body {
+      background-color: #0A0A0A;
+      color: #e5e2e1;
+      font-family: 'Inter', sans-serif;
+    }
+    .telemetry-grid {
+      background-image: 
+        linear-gradient(to right, #202020 1px, transparent 1px),
+        linear-gradient(to bottom, #202020 1px, transparent 1px);
+      background-size: 36px 36px;
+    }
+    .tech-panel {
+      background-color: #161616;
+      border: 1px solid #252525;
+      position: relative;
+    }
+    .tech-panel::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 2px;
+    }
+    .tech-panel.alert::before { background-color: #e10600; box-shadow: 0 0 8px #e10600; }
+    .tech-panel.optimal::before { background-color: #41f03e; box-shadow: 0 0 8px #41f03e; }
+    .tech-panel.caution::before { background-color: #ffba20; box-shadow: 0 0 8px #ffba20; }
+    .tech-panel.info::before { background-color: #252525; }
+
+    ::-webkit-scrollbar { width: 4px; height: 4px; }
+    ::-webkit-scrollbar-track { background: #0e0e0e; }
+    ::-webkit-scrollbar-thumb { background: #353534; }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col pt-16 md:pl-64 antialiased selection:bg-primary-container selection:text-white">
+
+  <!-- Top Navigation Bar -->
+  <nav class="bg-surface-container-lowest border-b border-outline-variant/30 backdrop-blur-xl fixed top-0 left-0 w-full z-50 flex justify-between items-center px-6 h-16 text-primary">
+    <div class="flex items-center gap-6">
+      <a href="index.html" class="flex items-center gap-2 text-white hover:text-primary transition-colors">
+        <span class="w-3 h-3 rounded-full bg-primary-container shadow-[0_0_8px_#e10600] animate-pulse"></span>
+        <span class="font-display-lg text-lg md:text-xl font-black tracking-tighter text-white">THE SILENT CO-DRIVER</span>
+      </a>
+      <div class="h-6 w-px bg-[#252525] hidden lg:block"></div>
+      <ul class="hidden lg:flex gap-6 items-center font-label-caps text-xs font-bold tracking-wider">
+        <li><a class="text-on-surface-variant hover:text-white transition-colors" href="index.html">LIVE COCKPIT</a></li>
+        <li><a class="text-primary border-b-2 border-primary-container pb-1" href="lap_correlation.html">LAP CORRELATION</a></li>
+        <li><a class="text-on-surface-variant hover:text-white transition-colors" href="race_radio.html">RADIO ANALYZER</a></li>
+        <li><a class="text-on-surface-variant hover:text-white transition-colors" href="analysis_result.html">ANALYSIS RESULT</a></li>
+      </ul>
+    </div>
+    <div class="flex items-center gap-4">
+      <div class="hidden sm:flex items-center gap-2 bg-[#0e0e0e] border border-[#252525] px-3 py-1 text-xs font-mono text-secondary">
+        <span class="w-2 h-2 rounded-full bg-secondary animate-pulse"></span>
+        CORRELATION ENGINE ONLINE
+      </div>
+      <a href="index.html" class="bg-primary-container hover:bg-red-700 text-white text-xs font-bold px-3 py-1.5 rounded transition-all uppercase flex items-center gap-1">
+        <span class="material-symbols-outlined text-[16px]">speed</span> LIVE HUD
+      </a>
+    </div>
+  </nav>
+
+  <!-- Side Navigation Bar -->
+  <aside class="hidden md:flex bg-surface-container border-r border-outline-variant/20 fixed left-0 top-0 h-full z-40 flex-col pt-16 w-64">
+    <div class="p-4 border-b border-outline-variant/20 flex items-center gap-3">
+      <div class="w-2.5 h-2.5 rounded-full bg-secondary shadow-[0_0_8px_#41f03e] animate-pulse"></div>
+      <div>
+        <div class="font-label-caps text-[11px] font-bold text-on-surface tracking-wider">CORRELATION SYS</div>
+        <div class="font-data-sm text-[10px] text-secondary tracking-widest">SESSION STINT 3</div>
+      </div>
+    </div>
+    
+    <div class="p-4">
+      <a href="race_radio.html" class="w-full bg-primary-container hover:bg-red-700 text-white font-bold text-xs py-2 px-3 rounded flex justify-center items-center gap-2 transition-all uppercase">
+        <span class="material-symbols-outlined text-[16px]">mic</span> INGEST RACE RADIO
+      </a>
+    </div>
+
+    <nav class="flex-1 mt-2">
+      <ul class="flex flex-col">
+        <li>
+          <a class="text-on-surface-variant hover:bg-surface-bright px-4 py-3 flex items-center gap-3 transition-all" href="index.html">
+            <span class="material-symbols-outlined text-[18px]">speed</span>
+            <span class="font-label-caps text-xs font-bold">Live Cockpit</span>
+          </a>
+        </li>
+        <li>
+          <a class="bg-primary-container text-white border-l-4 border-primary px-4 py-3 flex items-center gap-3 transition-all" href="lap_correlation.html">
+            <span class="material-symbols-outlined text-[18px]">timeline</span>
+            <span class="font-label-caps text-xs font-bold">Lap Correlation</span>
+          </a>
+        </li>
+        <li>
+          <a class="text-on-surface-variant hover:bg-surface-bright px-4 py-3 flex items-center gap-3 transition-all" href="race_radio.html">
+            <span class="material-symbols-outlined text-[18px]">radio</span>
+            <span class="font-label-caps text-xs font-bold">Radio Ingest</span>
+          </a>
+        </li>
+        <li>
+          <a class="text-on-surface-variant hover:bg-surface-bright px-4 py-3 flex items-center gap-3 transition-all" href="analysis_result.html">
+            <span class="material-symbols-outlined text-[18px]">analytics</span>
+            <span class="font-label-caps text-xs font-bold">Analysis Debrief</span>
+          </a>
+        </li>
+      </ul>
+    </nav>
+
+    <div class="mt-auto p-4 border-t border-outline-variant/20">
+      <div class="bg-[#0e0e0e] border border-[#252525] p-3 rounded text-xs flex flex-col gap-1 font-mono text-gray-400">
+        <div class="flex justify-between"><span>DRIVER:</span> <strong class="text-white">CHARLES L.</strong></div>
+        <div class="flex justify-between"><span>TRACK:</span> <strong class="text-white">SPA GP</strong></div>
+        <div class="flex justify-between"><span>CORR DELTA:</span> <strong class="text-secondary">+0.84s</strong></div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main Workstation Canvas -->
+  <main class="flex-1 p-4 md:p-6 bg-background">
+    <!-- Header -->
+    <header class="mb-6 flex flex-col md:flex-row justify-between items-start md:items-end border-b border-[#252525] pb-4 gap-3">
+      <div>
+        <div class="flex items-center gap-2">
+          <span class="text-primary-container text-xs font-mono font-bold">[MOD.08 // CORRELATION]</span>
+          <span class="text-xs bg-[#1a1a1a] border border-[#333] px-2 py-0.5 rounded text-gray-300 font-mono">CIRCUIT DE SPA-FRANCORCHAMPS</span>
+        </div>
+        <h1 class="font-headline-md text-2xl md:text-3xl font-extrabold text-white tracking-tight uppercase mt-1">RACE SESSION // CORRELATION DASHBOARD</h1>
+        <p class="font-data-sm text-xs text-on-surface-variant mt-1 flex items-center gap-2">
+          <span class="w-2 h-2 rounded-full bg-secondary animate-pulse"></span>
+          TELEMETRY CORRELATION SYNC DELAY: 24ms // SENSOR CONFIDENCE: 98.4%
+        </p>
+      </div>
+      <div class="flex gap-2 font-mono text-xs">
+        <div class="border border-[#252525] bg-[#161616] px-3 py-1.5 flex items-center gap-2">
+          <span class="material-symbols-outlined text-[14px] text-primary">calendar_today</span>
+          STINT 3 (LAPS 1-7)
+        </div>
+        <div class="border border-[#252525] bg-[#161616] px-3 py-1.5 flex items-center gap-2">
+          <span class="material-symbols-outlined text-[14px] text-tertiary">thermostat</span>
+          TRACK: 42.1°C
+        </div>
+      </div>
+    </header>
+
+    <!-- KPI Rack -->
+    <div class="grid grid-cols-2 md:grid-cols-5 gap-3 mb-6">
+      <!-- Current Lap -->
+      <div class="tech-panel optimal p-3">
+        <div class="flex justify-between items-start mb-2">
+          <span class="font-label-caps text-[10px] font-bold text-gray-400 uppercase">CURRENT LAP</span>
+          <span class="material-symbols-outlined text-secondary text-[16px]">sync</span>
+        </div>
+        <div class="font-data-lg text-2xl font-bold text-white">07</div>
+      </div>
+
+      <!-- Best Lap -->
+      <div class="tech-panel optimal p-3">
+        <div class="flex justify-between items-start mb-2">
+          <span class="font-label-caps text-[10px] font-bold text-gray-400 uppercase">BEST LAP</span>
+          <span class="material-symbols-outlined text-secondary text-[16px]">emoji_events</span>
+        </div>
+        <div class="font-data-lg text-2xl font-bold text-white">91.2<span class="text-gray-400 text-sm">s</span></div>
+      </div>
+
+      <!-- Avg Lap -->
+      <div class="tech-panel info p-3">
+        <div class="flex justify-between items-start mb-2">
+          <span class="font-label-caps text-[10px] font-bold text-gray-400 uppercase">AVG LAP</span>
+          <span class="material-symbols-outlined text-gray-400 text-[16px]">ssid_chart</span>
+        </div>
+        <div class="font-data-lg text-2xl font-bold text-white">92.9<span class="text-gray-400 text-sm">s</span></div>
+      </div>
+
+      <!-- Stress Events -->
+      <div class="tech-panel caution p-3">
+        <div class="flex justify-between items-start mb-2">
+          <span class="font-label-caps text-[10px] font-bold text-gray-400 uppercase">STRESS EVENTS</span>
+          <span class="material-symbols-outlined text-tertiary text-[16px]">warning</span>
+        </div>
+        <div class="font-data-lg text-2xl font-bold text-tertiary">03</div>
+      </div>
+
+      <!-- Driver Mood -->
+      <div class="tech-panel alert p-3 col-span-2 md:col-span-1">
+        <div class="flex justify-between items-start mb-2">
+          <span class="font-label-caps text-[10px] font-bold text-gray-400 uppercase">DRIVER MOOD</span>
+          <span class="material-symbols-outlined text-primary-container text-[16px] animate-pulse">psychology_alt</span>
+        </div>
+        <div class="font-data-lg text-lg font-bold text-primary-container tracking-wider uppercase flex items-center gap-1">
+          STRESSED <span class="material-symbols-outlined text-[18px]">trending_up</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Analytics Grid -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+      
+      <!-- Module: Correlation Chart Centerpiece (8 Cols) -->
+      <div class="lg:col-span-8 tech-panel info flex flex-col overflow-hidden">
+        <div class="border-b border-[#252525] p-3 flex flex-wrap justify-between items-center bg-[#111] gap-2">
+          <div class="flex items-center gap-2">
+            <span class="material-symbols-outlined text-primary-container text-lg">timeline</span>
+            <h2 class="font-label-caps text-xs font-bold text-white uppercase tracking-widest">LAP TIME VS LAP NUMBER // EMOTION CORRELATION</h2>
+          </div>
+          <div class="flex gap-3 font-mono text-[11px]">
+            <div class="flex items-center gap-1.5"><div class="w-2.5 h-2.5 bg-secondary rounded-full"></div> CALM (L1-L3)</div>
+            <div class="flex items-center gap-1.5"><div class="w-2.5 h-2.5 bg-tertiary rounded-full"></div> TIRED (L4-L5)</div>
+            <div class="flex items-center gap-1.5"><div class="w-2.5 h-2.5 bg-primary-container rounded-full shadow-[0_0_6px_#e10600]"></div> STRESSED (L6-L7)</div>
+          </div>
+        </div>
+
+        <!-- Telemetry Interactive Canvas / SVG -->
+        <div class="relative w-full min-h-[380px] p-6 telemetry-grid flex-1">
+          <!-- Y Axis Labels -->
+          <div class="absolute left-2 top-6 bottom-8 flex flex-col justify-between font-mono text-[11px] text-gray-500 pointer-events-none">
+            <span>95.0s</span>
+            <span>94.0s</span>
+            <span>93.0s</span>
+            <span>92.0s</span>
+            <span>91.0s</span>
+          </div>
+
+          <!-- X Axis Labels -->
+          <div class="absolute left-12 right-6 bottom-2 flex justify-between font-mono text-[11px] text-gray-500 pointer-events-none">
+            <span>LAP 01</span><span>LAP 02</span><span>LAP 03 (PB)</span><span>LAP 04</span><span>LAP 05</span><span>LAP 06</span><span>LAP 07</span>
+          </div>
+
+          <!-- SVG Chart with Gradient Trace and Interaction Points -->
+          <svg class="w-full h-full min-h-[320px] overflow-visible" preserveAspectRatio="none" viewBox="0 0 700 280">
+            <defs>
+              <linearGradient id="traceGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" stop-color="#41f03e"/>
+                <stop offset="40%" stop-color="#41f03e"/>
+                <stop offset="60%" stop-color="#ffba20"/>
+                <stop offset="80%" stop-color="#e10600"/>
+                <stop offset="100%" stop-color="#e10600"/>
+              </linearGradient>
+            </defs>
+
+            <!-- Highlight Stressed Zone -->
+            <rect x="420" y="0" width="280" height="280" fill="#e10600" opacity="0.05"/>
+            <line x1="420" y1="0" x2="420" y2="280" stroke="#e10600" stroke-dasharray="3 3" opacity="0.4"/>
+
+            <!-- Main Telemetry Path -->
+            <path d="M 0 190 L 110 230 L 230 270 L 350 200 L 460 140 L 570 90 L 680 40" fill="none" stroke="url(#traceGrad)" stroke-width="3" filter="drop-shadow(0 0 6px rgba(225,6,0,0.5))"/>
+
+            <!-- Interactive Lap Points -->
+            <circle cx="0" cy="190" r="5" fill="#41f03e" stroke="#131313" stroke-width="2"/>
+            <circle cx="110" cy="230" r="5" fill="#41f03e" stroke="#131313" stroke-width="2"/>
+            <!-- PB Lap 3 -->
+            <circle cx="230" cy="270" r="6" fill="#75ff67" stroke="#131313" stroke-width="2"/>
+            <circle cx="350" cy="200" r="5" fill="#ffba20" stroke="#131313" stroke-width="2"/>
+            <circle cx="460" cy="140" r="5" fill="#ffba20" stroke="#131313" stroke-width="2"/>
+            <circle cx="570" cy="90" r="5" fill="#e10600" stroke="#131313" stroke-width="2"/>
+            
+            <!-- Stressed Lap 7 Pulse -->
+            <g class="animate-pulse">
+              <circle cx="680" cy="40" r="14" fill="#e10600" opacity="0.25"/>
+              <circle cx="680" cy="40" r="7" fill="#e10600" stroke="#fff" stroke-width="1.5"/>
+            </g>
+          </svg>
+
+          <!-- Interactive Stress Callout Annotation Overlay -->
+          <div class="absolute top-[8%] right-[4%] flex flex-col items-center">
+            <div class="bg-[#141414] border border-primary-container p-3 flex flex-col shadow-[0_0_15px_rgba(225,6,0,0.3)] z-10 max-w-[220px]">
+              <div class="flex items-center gap-1 border-b border-primary-container/40 pb-1 mb-1 text-primary-container text-xs font-bold">
+                <span class="material-symbols-outlined text-[14px]">warning</span>
+                <span>STRESS SPIKE DETECTED</span>
+              </div>
+              <div class="font-mono text-xs text-white">LAP 07: 94.12s <span class="text-primary-container">(+2.92s)</span></div>
+              <div class="text-[11px] text-gray-400 italic mt-1 font-serif">"Box box box, tires are gone. Rear stepping out everywhere."</div>
+              <a href="analysis_result.html" class="mt-2 text-[10px] font-mono text-primary hover:underline flex items-center gap-1">
+                VIEW DEEP DIVE <span class="material-symbols-outlined text-[12px]">arrow_forward</span>
+              </a>
+            </div>
+            <div class="w-px h-8 bg-primary-container"></div>
+          </div>
+        </div>
+
+        <!-- Delta Correlation Summary Bar -->
+        <div class="border-t border-[#252525] bg-[#0c0c0c] p-3 flex flex-wrap justify-between items-center text-xs font-mono text-gray-400">
+          <div>TELEMETRY CORRELATION: <strong class="text-white">Driver heart rate +18 BPM correlates with +0.42s corner exit loss</strong></div>
+          <div class="flex gap-2">
+            <span class="text-secondary">P1 APEX OPTIMAL</span>
+            <span class="text-gray-600">|</span>
+            <span class="text-primary-container">REAR DEGRADATION CRITICAL</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Module: Live Comms Timeline (4 Cols) -->
+      <div class="lg:col-span-4 tech-panel info flex flex-col max-h-[520px]">
+        <div class="border-b border-[#252525] p-3 flex justify-between items-center bg-[#111]">
+          <div class="flex items-center gap-2">
+            <span class="material-symbols-outlined text-primary text-lg">radio</span>
+            <h2 class="font-label-caps text-xs font-bold text-white uppercase tracking-widest">RACE COMMS TIMELINE</h2>
+          </div>
+          <span class="font-mono text-[10px] text-secondary bg-secondary/10 px-2 py-0.5 border border-secondary/30 rounded">LIVE RECORD</span>
+        </div>
+
+        <div class="flex-1 overflow-y-auto flex flex-col p-2 gap-2">
+          
+          <!-- Lap 07 Active Callout -->
+          <div class="p-3 border border-primary-container/60 bg-primary-container/10 border-l-4 border-l-primary-container relative rounded-r">
+            <div class="flex justify-between items-start mb-1">
+              <span class="font-mono text-xs text-white bg-[#0e0e0e] border border-[#333] px-1.5 py-0.5 rounded">LAP 07</span>
+              <div class="flex items-center gap-1 text-primary-container text-xs font-bold">
+                <span class="material-symbols-outlined text-[14px]">psychology_alt</span>
+                STRESSED
+              </div>
+            </div>
+            <p class="text-xs text-white font-medium leading-relaxed">"Box box box, tires are gone. Rear is stepping out everywhere."</p>
+            <div class="mt-2 flex gap-2 font-mono text-[10px]">
+              <span class="text-gray-300 border border-[#333] bg-[#0c0c0c] px-1.5 py-0.5">CONFIDENCE: 98%</span>
+              <span class="text-primary-container border border-primary-container/40 bg-primary-container/20 px-1.5 py-0.5">EMOTION ALERT</span>
+            </div>
+          </div>
+
+          <!-- Lap 06 -->
+          <div class="p-3 border border-[#252525] bg-[#121212] hover:bg-[#181818] transition-colors rounded">
+            <div class="flex justify-between items-start mb-1">
+              <span class="font-mono text-xs text-gray-400 bg-[#0e0e0e] border border-[#222] px-1.5 py-0.5 rounded">LAP 06</span>
+              <div class="flex items-center gap-1 text-primary-container text-xs font-bold opacity-80">
+                <span class="material-symbols-outlined text-[14px]">psychology_alt</span>
+                STRESSED
+              </div>
+            </div>
+            <p class="text-xs text-gray-300">"Struggling for traction out of turn 4. Throttle lag."</p>
+          </div>
+
+          <!-- Lap 04 -->
+          <div class="p-3 border border-[#252525] bg-[#121212] hover:bg-[#181818] transition-colors rounded">
+            <div class="flex justify-between items-start mb-1">
+              <span class="font-mono text-xs text-gray-400 bg-[#0e0e0e] border border-[#222] px-1.5 py-0.5 rounded">LAP 04</span>
+              <div class="flex items-center gap-1 text-tertiary text-xs font-bold">
+                <span class="material-symbols-outlined text-[14px]">face</span>
+                TIRED
+              </div>
+            </div>
+            <p class="text-xs text-gray-300">"Temps are getting high on front left, backing off slightly."</p>
+          </div>
+
+          <!-- Lap 02 -->
+          <div class="p-3 border border-[#252525] bg-[#121212] hover:bg-[#181818] transition-colors rounded">
+            <div class="flex justify-between items-start mb-1">
+              <span class="font-mono text-xs text-gray-400 bg-[#0e0e0e] border border-[#222] px-1.5 py-0.5 rounded">LAP 02</span>
+              <div class="flex items-center gap-1 text-secondary text-xs font-bold">
+                <span class="material-symbols-outlined text-[14px]">sentiment_satisfied</span>
+                CALM
+              </div>
+            </div>
+            <p class="text-xs text-gray-300">"Car feels balanced, settling into target lap delta."</p>
+          </div>
+
+        </div>
+
+        <div class="p-3 border-t border-[#252525] bg-[#0e0e0e] flex justify-between items-center">
+          <a href="race_radio.html" class="w-full text-center bg-[#201f1f] hover:bg-primary-container text-white text-xs font-mono py-2 rounded transition-colors uppercase">
+            OPEN FULL RADIO WORKSTATION →
+          </a>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- System Footer -->
+    <footer class="mt-8 border-t border-[#252525] pt-4 flex flex-col md:flex-row justify-between items-center gap-4 text-gray-500 font-mono text-xs">
+      <div class="flex items-center gap-3 bg-[#111] border border-[#222] px-3 py-1.5 rounded">
+        <span class="w-2 h-2 rounded-full bg-secondary animate-pulse"></span>
+        AI SYSTEM: <span class="text-secondary font-bold">WHISPER + EMOTION MODEL v2.4 ONLINE</span>
+      </div>
+      <div class="flex gap-6">
+        <span>FRAMEWORK: ANTIGRAVITY TELEMETRY ENGINE</span>
+        <span>LATENCY: 12ms</span>
+      </div>
+    </footer>
+  </main>
+
+</body>
+</html>

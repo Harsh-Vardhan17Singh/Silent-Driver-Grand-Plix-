@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html class="dark" lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <title>Analysis Result & AI Debrief | The Silent Co-Driver</title>
+  <meta name="description" content="AI race radio sentiment analysis, stress index detection, and telemetry correlation debrief.">
+  <link href="https://fonts.googleapis.com" rel="preconnect"/>
+  <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700;800&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "surface": "#131313",
+            "surface-dim": "#131313",
+            "surface-bright": "#3a3939",
+            "surface-container-lowest": "#0e0e0e",
+            "surface-container-low": "#1c1b1b",
+            "surface-container": "#201f1f",
+            "surface-container-high": "#2a2a2a",
+            "surface-container-highest": "#353534",
+            "on-surface": "#e5e2e1",
+            "on-surface-variant": "#e9bcb5",
+            "primary": "#ffb4a8",
+            "primary-container": "#e10600",
+            "secondary": "#41f03e",
+            "secondary-fixed": "#75ff67",
+            "secondary-fixed-dim": "#30e532",
+            "tertiary": "#ffba20",
+            "outline": "#af8781",
+            "outline-variant": "#5e3f3a",
+            "background": "#131313"
+          },
+          fontFamily: {
+            "body-base": ["Inter", "sans-serif"],
+            "data-sm": ["JetBrains Mono", "monospace"],
+            "data-lg": ["JetBrains Mono", "monospace"],
+            "display-lg": ["Inter", "sans-serif"],
+            "label-caps": ["Inter", "sans-serif"],
+            "headline-md": ["Inter", "sans-serif"]
+          },
+          spacing: {
+            "unit": "4px",
+            "gutter": "16px",
+            "margin": "24px",
+            "panel-padding": "12px"
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body {
+      background-color: #0A0A0A;
+      color: #e5e2e1;
+      font-family: 'Inter', sans-serif;
+    }
+    .tech-panel {
+      background-color: #161616;
+      border: 1px solid #252525;
+      position: relative;
+    }
+    .tech-panel::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 2px;
+    }
+    .tech-panel.alert::before { background-color: #E10600; box-shadow: 0 0 8px #e10600; }
+    .tech-panel.info::before { background-color: #252525; }
+
+    .carbon-bg {
+      background-image: repeating-linear-gradient(45deg, rgba(28,28,28,0.5) 0, rgba(28,28,28,0.5) 2px, transparent 2px, transparent 4px);
+    }
+    .glow-alert {
+      box-shadow: 0 0 16px rgba(225, 6, 0, 0.25);
+      border: 1px solid #E10600;
+    }
+    .telemetry-tick { width: 1px; background-color: #252525; height: 100%; min-height: 48px; }
+
+    ::-webkit-scrollbar { width: 4px; height: 4px; }
+    ::-webkit-scrollbar-track { background: #0e0e0e; }
+    ::-webkit-scrollbar-thumb { background: #353534; }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col pt-16 md:pl-64 antialiased selection:bg-primary-container selection:text-white">
+
+  <!-- Top Navigation Bar -->
+  <nav class="bg-surface-container-lowest border-b border-outline-variant/30 backdrop-blur-xl fixed top-0 left-0 w-full z-50 flex justify-between items-center px-6 h-16 text-primary">
+    <div class="flex items-center gap-6">
+      <a href="index.html" class="flex items-center gap-2 text-white hover:text-primary transition-colors">
+        <span class="w-3 h-3 rounded-full bg-primary-container shadow-[0_0_8px_#e10600] animate-pulse"></span>
+        <span class="font-display-lg text-lg md:text-xl font-black tracking-tighter text-white">THE SILENT CO-DRIVER</span>
+      </a>
+      <div class="h-6 w-px bg-[#252525] hidden lg:block"></div>
+      <ul class="hidden lg:flex gap-6 items-center font-label-caps text-xs font-bold tracking-wider">
+        <li><a class="text-on-surface-variant hover:text-white transition-colors" href="index.html">LIVE COCKPIT</a></li>
+        <li><a class="text-on-surface-variant hover:text-white transition-colors" href="lap_correlation.html">LAP CORRELATION</a></li>
+        <li><a class="text-on-surface-variant hover:text-white transition-colors" href="race_radio.html">RADIO ANALYZER</a></li>
+        <li><a class="text-primary border-b-2 border-primary-container pb-1" href="analysis_result.html">ANALYSIS RESULT</a></li>
+      </ul>
+    </div>
+    <div class="flex items-center gap-4">
+      <div class="hidden sm:flex items-center gap-2 bg-[#0e0e0e] border border-[#252525] px-3 py-1 text-xs font-mono text-secondary">
+        <span class="w-2 h-2 rounded-full bg-secondary animate-pulse"></span>
+        SYNC COMPLETED // ANL-8472-X9
+      </div>
+      <a href="index.html" class="bg-primary-container hover:bg-red-700 text-white text-xs font-bold px-3 py-1.5 rounded transition-all uppercase flex items-center gap-1">
+        <span class="material-symbols-outlined text-[16px]">speed</span> LIVE HUD
+      </a>
+    </div>
+  </nav>
+
+  <!-- Side Navigation Bar -->
+  <aside class="hidden md:flex bg-surface-container border-r border-outline-variant/20 fixed left-0 top-0 h-full z-40 flex-col pt-16 w-64">
+    <div class="p-4 border-b border-outline-variant/20 flex items-center gap-3">
+      <div class="w-2.5 h-2.5 rounded-full bg-secondary animate-pulse"></div>
+      <div>
+        <div class="font-label-caps text-[11px] font-bold text-on-surface tracking-wider">AI DEBRIEF READY</div>
+        <div class="font-data-sm text-[10px] text-secondary tracking-widest">PROCESSED IN 14ms</div>
+      </div>
+    </div>
+    
+    <div class="p-4">
+      <a href="race_radio.html" class="w-full bg-primary-container hover:bg-red-700 text-white font-bold text-xs py-2 px-3 rounded flex justify-center items-center gap-2 transition-all uppercase">
+        <span class="material-symbols-outlined text-[16px]">add</span> NEW ANALYSIS
+      </a>
+    </div>
+
+    <nav class="flex-1 mt-2">
+      <ul class="flex flex-col">
+        <li>
+          <a class="text-on-surface-variant hover:bg-surface-bright px-4 py-3 flex items-center gap-3 transition-all" href="index.html">
+            <span class="material-symbols-outlined text-[18px]">speed</span>
+            <span class="font-label-caps text-xs font-bold">Live Cockpit</span>
+          </a>
+        </li>
+        <li>
+          <a class="text-on-surface-variant hover:bg-surface-bright px-4 py-3 flex items-center gap-3 transition-all" href="lap_correlation.html">
+            <span class="material-symbols-outlined text-[18px]">timeline</span>
+            <span class="font-label-caps text-xs font-bold">Lap Correlation</span>
+          </a>
+        </li>
+        <li>
+          <a class="text-on-surface-variant hover:bg-surface-bright px-4 py-3 flex items-center gap-3 transition-all" href="race_radio.html">
+            <span class="material-symbols-outlined text-[18px]">radio</span>
+            <span class="font-label-caps text-xs font-bold">Radio Ingest</span>
+          </a>
+        </li>
+        <li>
+          <a class="bg-primary-container text-white border-l-4 border-primary px-4 py-3 flex items-center gap-3 transition-all" href="analysis_result.html">
+            <span class="material-symbols-outlined text-[18px]">analytics</span>
+            <span class="font-label-caps text-xs font-bold">Analysis Debrief</span>
+          </a>
+        </li>
+      </ul>
+    </nav>
+
+    <div class="mt-auto p-4 border-t border-outline-variant/20">
+      <div class="bg-[#0e0e0e] border border-[#252525] p-3 rounded text-xs flex flex-col gap-1 font-mono text-gray-400">
+        <div class="flex justify-between"><span>RECORD ID:</span> <strong class="text-white">ANL-8472</strong></div>
+        <div class="flex justify-between"><span>CONFIDENCE:</span> <strong class="text-primary-container">87%</strong></div>
+        <div class="flex justify-between"><span>ACTION:</span> <strong class="text-secondary">BOX REQUIRED</strong></div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main Canvas Content -->
+  <main class="flex-1 p-4 md:p-6 bg-background">
+    <!-- Header -->
+    <header class="mb-6 flex flex-col md:flex-row justify-between items-start md:items-end border-b border-[#252525] pb-4 gap-3">
+      <div>
+        <div class="flex items-center gap-2">
+          <span class="text-primary-container text-xs font-mono font-bold">[MOD.09 // POST-SESSION DEBRIEF]</span>
+          <span class="text-xs bg-[#1a1a1a] border border-[#333] px-2 py-0.5 rounded text-gray-300 font-mono">RECORD: ANL-8472-X9</span>
+        </div>
+        <h1 class="font-headline-md text-2xl md:text-3xl font-extrabold text-white tracking-tight uppercase mt-1">ANALYSIS RESULT // TACTICAL DEBRIEF</h1>
+        <p class="font-data-sm text-xs text-on-surface-variant mt-1">
+          Acoustic vocal analysis synchronized with Lap 07 telemetry sector data.
+        </p>
+      </div>
+      <div class="flex items-center gap-3">
+        <button id="btn-export" class="bg-[#1f1f1f] hover:bg-[#2a2a2a] text-white border border-[#333] px-3 py-1.5 rounded text-xs font-mono transition-colors flex items-center gap-1.5 uppercase">
+          <span class="material-symbols-outlined text-[16px]">file_download</span> EXPORT REPORT
+        </button>
+        <a href="lap_correlation.html" class="bg-primary-container hover:bg-red-700 text-white px-3 py-1.5 rounded text-xs font-bold transition-colors flex items-center gap-1.5 uppercase">
+          <span class="material-symbols-outlined text-[16px]">timeline</span> VIEW IN CORRELATION
+        </a>
+      </div>
+    </header>
+
+    <!-- Top Status Cards Grid -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 mb-6">
+      
+      <!-- Top Driver Alert Status Card (8 Cols) -->
+      <div class="lg:col-span-8 tech-panel alert p-4 flex flex-col md:flex-row gap-4 md:items-center justify-between carbon-bg glow-alert rounded">
+        <div class="flex flex-col gap-1">
+          <span class="font-label-caps text-xs font-bold text-gray-400 uppercase">DRIVER</span>
+          <span class="font-data-lg text-xl font-extrabold text-white uppercase tracking-wider">Charles Leclerc (CAR #16)</span>
+        </div>
+        <div class="hidden md:block telemetry-tick"></div>
+        
+        <div class="flex flex-col gap-1">
+          <span class="font-label-caps text-xs font-bold text-gray-400 uppercase">LAP NUMBER</span>
+          <span class="font-data-lg text-2xl font-extrabold text-white">07 / 44</span>
+        </div>
+        <div class="hidden md:block telemetry-tick"></div>
+        
+        <div class="flex flex-col gap-1 items-start md:items-center">
+          <span class="font-label-caps text-xs font-bold text-gray-400 uppercase">DETECTED MOOD</span>
+          <div class="bg-primary-container text-white px-3 py-1 text-xs font-bold font-mono uppercase tracking-widest border border-primary flex items-center gap-1.5 shadow-[0_0_10px_#e10600] rounded">
+            <span class="material-symbols-outlined text-[14px]">warning</span>
+            STRESSED
+          </div>
+        </div>
+        <div class="hidden md:block telemetry-tick"></div>
+        
+        <div class="flex flex-col gap-1 md:items-end">
+          <span class="font-label-caps text-xs font-bold text-gray-400 uppercase">AI CONFIDENCE</span>
+          <span class="font-data-lg text-2xl font-extrabold text-primary-container">87%</span>
+        </div>
+      </div>
+
+      <!-- Analysis Confidence Summary (4 Cols) -->
+      <div class="lg:col-span-4 tech-panel info p-4 flex flex-col justify-between rounded">
+        <div>
+          <span class="font-label-caps text-xs font-bold text-gray-400 mb-3 block uppercase tracking-wider">ANALYSIS SUMMARY METRICS</span>
+          <div class="space-y-2.5 font-mono text-xs">
+            <div class="flex justify-between items-center border-b border-[#252525] pb-1.5">
+              <span class="text-gray-400">VOICE TONE:</span>
+              <span class="text-primary-container font-bold">High Stress (Acoustic Pitch +34Hz)</span>
+            </div>
+            <div class="flex justify-between items-center border-b border-[#252525] pb-1.5">
+              <span class="text-gray-400">ACOUSTIC CONFIDENCE:</span>
+              <span class="text-white font-bold">87%</span>
+            </div>
+            <div class="flex justify-between items-center pb-1">
+              <span class="text-gray-400">RECOMMENDED ACTION:</span>
+              <span class="text-secondary font-bold">BOX IN LAP 08 FOR HARDS</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 10-Segment Confidence Gauge -->
+        <div class="mt-4">
+          <div class="flex justify-between font-mono text-[10px] text-gray-500 mb-1">
+            <span>0%</span>
+            <span>AI CONFIDENCE GAUGE</span>
+            <span>100%</span>
+          </div>
+          <div class="h-3 w-full flex gap-1 bg-[#050505] p-1 border border-[#252525] rounded-sm">
+            <div class="flex-1 bg-secondary rounded-sm"></div>
+            <div class="flex-1 bg-secondary rounded-sm"></div>
+            <div class="flex-1 bg-secondary rounded-sm"></div>
+            <div class="flex-1 bg-tertiary rounded-sm"></div>
+            <div class="flex-1 bg-tertiary rounded-sm"></div>
+            <div class="flex-1 bg-tertiary rounded-sm"></div>
+            <div class="flex-1 bg-primary-container rounded-sm"></div>
+            <div class="flex-1 bg-primary-container rounded-sm"></div>
+            <div class="flex-1 bg-primary-container opacity-50 rounded-sm"></div>
+            <div class="flex-1 bg-transparent border border-[#222]"></div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Radio Transcript & Waveform Audio Inspection (Full Width) -->
+    <div class="tech-panel info mb-6 rounded overflow-hidden">
+      <div class="border-b border-[#252525] p-3 flex justify-between items-center bg-[#111]">
+        <span class="font-label-caps text-xs font-bold text-gray-400 flex items-center gap-2 uppercase tracking-wider">
+          <span class="material-symbols-outlined text-[16px] text-primary-container">graphic_eq</span>
+          DRIVER RADIO AUDIO TRANSCRIPT
+        </span>
+        <span class="font-mono text-[11px] text-gray-400">LAP 07 | 14:32:05.112 UTC</span>
+      </div>
+
+      <div class="p-6 md:p-8 bg-[#070707] relative overflow-hidden flex flex-col gap-4">
+        <!-- Audio waveform bars in background -->
+        <div class="flex items-center gap-1 h-12 opacity-30 overflow-hidden">
+          <div class="w-1.5 h-6 bg-primary-container animate-pulse"></div>
+          <div class="w-1.5 h-10 bg-primary-container animate-pulse" style="animation-delay: 0.1s"></div>
+          <div class="w-1.5 h-8 bg-primary-container animate-pulse" style="animation-delay: 0.2s"></div>
+          <div class="w-1.5 h-12 bg-primary-container animate-pulse" style="animation-delay: 0.3s"></div>
+          <div class="w-1.5 h-7 bg-primary-container animate-pulse" style="animation-delay: 0.4s"></div>
+          <div class="w-1.5 h-11 bg-primary-container animate-pulse" style="animation-delay: 0.5s"></div>
+          <div class="w-1.5 h-5 bg-primary-container animate-pulse" style="animation-delay: 0.6s"></div>
+          <div class="w-1.5 h-9 bg-primary-container animate-pulse" style="animation-delay: 0.15s"></div>
+          <div class="w-1.5 h-12 bg-primary-container animate-pulse" style="animation-delay: 0.25s"></div>
+          <div class="w-1.5 h-7 bg-primary-container animate-pulse" style="animation-delay: 0.35s"></div>
+          <div class="w-1.5 h-10 bg-primary-container animate-pulse" style="animation-delay: 0.45s"></div>
+          <div class="w-1.5 h-4 bg-primary-container animate-pulse" style="animation-delay: 0.55s"></div>
+        </div>
+
+        <div class="border-l-4 border-primary-container pl-4 py-1">
+          <span class="text-xs font-mono text-gray-500 block mb-1">TRANSCRIBED AUDIO:</span>
+          <p class="font-data-lg text-2xl md:text-3xl font-extrabold text-white tracking-tight uppercase" style="text-shadow: 0 0 10px rgba(225,6,0,0.4);">
+            "BOX BOX BOX, TIRES ARE GONE. REAR IS STEPPING OUT EVERYWHERE."
+          </p>
+        </div>
+
+        <!-- Telemetry Correlation Callout Notes -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-2 font-mono text-xs">
+          <div class="bg-[#111] border border-[#222] p-3 rounded">
+            <span class="text-gray-500 block text-[10px]">CORRELATED SENSOR:</span>
+            <strong class="text-white">Rear Axle Slip Angle: +6.4°</strong>
+            <span class="text-primary-container block text-[11px] mt-1">Snap oversteer on Turn 14 exit</span>
+          </div>
+          <div class="bg-[#111] border border-[#222] p-3 rounded">
+            <span class="text-gray-500 block text-[10px]">TIRE THERMAL IMPACT:</span>
+            <strong class="text-white">Rear Left Temp: 114.8°C</strong>
+            <span class="text-tertiary block text-[11px] mt-1">+8.8°C above optimal threshold</span>
+          </div>
+          <div class="bg-[#111] border border-[#222] p-3 rounded">
+            <span class="text-gray-500 block text-[10px]">LAP TIME IMPACT:</span>
+            <strong class="text-white">Delta loss: +0.420s in Sector 3</strong>
+            <span class="text-secondary block text-[11px] mt-1">Traction recovery failure</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="p-3 border-t border-[#252525] flex justify-between items-center bg-[#111]">
+        <span class="font-mono text-xs text-gray-400">ENGINEER NOTES: Confirmed by pit wall. Box planned for Lap 8.</span>
+        <button id="btn-add-session" class="bg-primary-container hover:bg-red-700 text-white font-bold text-xs py-2 px-4 rounded transition-colors flex items-center gap-2 uppercase">
+          <span class="material-symbols-outlined text-[16px]">bookmark_add</span> ADD TO SESSION LOG
+        </button>
+      </div>
+    </div>
+
+    <!-- Quick Navigation Hub -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <a href="index.html" class="tech-panel info p-4 rounded hover:border-primary-container transition-all group flex items-center gap-4">
+        <span class="material-symbols-outlined text-3xl text-primary-container group-hover:scale-110 transition-transform">speed</span>
+        <div>
+          <span class="font-label-caps text-xs font-bold text-white block uppercase">RETURN TO LIVE COCKPIT</span>
+          <span class="font-mono text-xs text-gray-400">Real-time gauges & 60 FPS oscilloscope</span>
+        </div>
+      </a>
+
+      <a href="lap_correlation.html" class="tech-panel info p-4 rounded hover:border-secondary transition-all group flex items-center gap-4">
+        <span class="material-symbols-outlined text-3xl text-secondary group-hover:scale-110 transition-transform">timeline</span>
+        <div>
+          <span class="font-label-caps text-xs font-bold text-white block uppercase">VIEW LAP CORRELATION</span>
+          <span class="font-mono text-xs text-gray-400">Full stint 3 lap time vs stress analysis</span>
+        </div>
+      </a>
+
+      <a href="race_radio.html" class="tech-panel info p-4 rounded hover:border-tertiary transition-all group flex items-center gap-4">
+        <span class="material-symbols-outlined text-3xl text-tertiary group-hover:scale-110 transition-transform">mic</span>
+        <div>
+          <span class="font-label-caps text-xs font-bold text-white block uppercase">ANALYZE ANOTHER RADIO</span>
+          <span class="font-mono text-xs text-gray-400">Drop new audio or record live</span>
+        </div>
+      </a>
+    </div>
+
+  </main>
+
+  <script>
+    document.getElementById('btn-add-session').addEventListener('click', () => {
+      alert('Analysis ANL-8472-X9 successfully pinned to Session Stint 3 timeline.');
+    });
+
+    document.getElementById('btn-export').addEventListener('click', () => {
+      alert('Exporting Telemetry Report PDF // ANL-8472-X9 (Charles Leclerc - Spa L7)...');
+    });
+  </script>
+</body>
+</html>

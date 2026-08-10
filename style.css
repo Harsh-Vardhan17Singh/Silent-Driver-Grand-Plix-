@@ -1,0 +1,1510 @@
+/* ==========================================================================
+   THE SILENT CO-DRIVER — DESIGN SYSTEM & TELEMETRY STYLES
+   ========================================================================== */
+
+:root {
+  /* --- Palette Tokens --- */
+  --surface: #131313;
+  --surface-dim: #131313;
+  --surface-bright: #3a3939;
+  --surface-container-lowest: #0e0e0e;
+  --surface-container-low: #1c1b1b;
+  --surface-container: #201f1f;
+  --surface-container-high: #2a2a2a;
+  --surface-container-highest: #353534;
+  
+  --on-surface: #e5e2e1;
+  --on-surface-variant: #e9bcb5;
+  --inverse-surface: #e5e2e1;
+  --inverse-on-surface: #313030;
+  
+  --outline: #af8781;
+  --outline-variant: #5e3f3a;
+  --surface-tint: #ffb4a8;
+  
+  /* Primary Motorsport Racing Red */
+  --primary: #ffb4a8;
+  --on-primary: #680200;
+  --primary-container: #e10600;
+  --on-primary-container: #fff2f0;
+  --inverse-primary: #c00500;
+  
+  /* Status Green (Optimal / Go / Sector PB) */
+  --secondary: #41f03e;
+  --on-secondary: #003a02;
+  --secondary-container: #05d31e;
+  --on-secondary-container: #005405;
+  --secondary-fixed: #75ff67;
+  --secondary-fixed-dim: #30e532;
+  
+  /* Status Amber (Caution / Delta / Fuel Low) */
+  --tertiary: #ffba20;
+  --on-tertiary: #412d00;
+  --tertiary-container: #926800;
+  --on-tertiary-container: #fff3e4;
+  --tertiary-fixed: #ffdea8;
+  --tertiary-fixed-dim: #ffba20;
+
+  /* Status Error / Alarm */
+  --error: #ffb4ab;
+  --on-error: #690005;
+  --error-container: #93000a;
+  --on-error-container: #ffdad6;
+
+  /* Ambient Cockpit Tones */
+  --void-bg: #0a0a0a;
+  --panel-bg: #161616;
+  --panel-bg-glass: rgba(26, 26, 26, 0.75);
+  --border-neutral: #252525;
+  --border-active: #e10600;
+  --border-subtle: #1f1f1f;
+  --text-white: #f0f0f0;
+  --text-muted: #888888;
+  --text-purple: #c084fc;
+  --text-cyan: #38bdf8;
+
+  /* --- Rounded Tokens --- */
+  --radius-sm: 0.125rem;
+  --radius-default: 0.25rem;
+  --radius-md: 0.375rem;
+  --radius-lg: 0.5rem;
+  --radius-xl: 0.75rem;
+  --radius-full: 9999px;
+
+  /* --- Spacing Tokens --- */
+  --unit: 4px;
+  --gutter: 16px;
+  --margin: 24px;
+  --panel-padding: 12px;
+
+  /* --- Typography Fonts --- */
+  --font-ui: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-mono: 'JetBrains Mono', "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+}
+
+/* Base Reset */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  width: 100%;
+  min-height: 100vh;
+  background-color: var(--void-bg);
+  color: var(--on-surface);
+  font-family: var(--font-ui);
+  font-size: 14px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+}
+
+/* Subtle carbon grain overlay background */
+body::before {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+  z-index: 9999;
+  opacity: 0.025;
+  background-image: radial-gradient(#ffffff 1px, transparent 1px);
+  background-size: 8px 8px;
+}
+
+/* Typography Utility Classes */
+.text-mono, .val-mono {
+  font-family: var(--font-mono);
+}
+
+.text-red { color: var(--primary-container); }
+.text-green { color: var(--secondary); }
+.text-amber { color: var(--tertiary); }
+.text-purple { color: var(--text-purple); }
+.text-cyan { color: var(--text-cyan); }
+.text-xs { font-size: 11px; }
+.font-bold { font-weight: 700; }
+
+/* 45-degree Chamfer Styling */
+.chamfer-edge {
+  clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 0 100%);
+}
+
+.chamfer-sm {
+  clip-path: polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 0 100%);
+}
+
+/* ==========================================================================
+   HEADER / HUD BAR
+   ========================================================================== */
+
+.hud-header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 54px;
+  padding: 0 var(--margin);
+  background: rgba(19, 19, 19, 0.92);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border-neutral);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6);
+}
+
+.hud-header-left {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.hud-nav-links {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.nav-tab {
+  font-family: var(--font-ui);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: #888;
+  text-decoration: none;
+  padding: 4px 8px;
+  border-radius: var(--radius-sm);
+  transition: all 0.15s ease;
+}
+
+.nav-tab:hover {
+  color: var(--text-white);
+  background: var(--surface-container-high);
+}
+
+.nav-tab.active {
+  color: var(--text-white);
+  border-bottom: 2px solid var(--primary-container);
+  border-radius: 0;
+}
+
+.brand-badge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--surface-container-high);
+  padding: 6px 14px;
+  border-left: 3px solid var(--primary-container);
+  border-top: 1px solid var(--surface-bright);
+}
+
+.pulse-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: var(--radius-full);
+  background: var(--primary-container);
+  box-shadow: 0 0 8px var(--primary-container);
+  animation: pulse-glow 1.5s infinite ease-in-out;
+}
+
+@keyframes pulse-glow {
+  0%, 100% { transform: scale(0.9); opacity: 0.8; }
+  50% { transform: scale(1.2); opacity: 1; filter: drop-shadow(0 0 4px var(--primary-container)); }
+}
+
+.brand-title {
+  font-family: var(--font-ui);
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  color: var(--text-white);
+}
+
+.brand-sub {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--outline);
+  background: #0e0e0e;
+  padding: 2px 5px;
+  border-radius: var(--radius-sm);
+}
+
+.system-divider {
+  width: 1px;
+  height: 24px;
+  background: var(--border-neutral);
+}
+
+.meta-readout {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.1;
+}
+
+.meta-label {
+  font-family: var(--font-ui);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: #777;
+}
+
+.meta-val {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-white);
+}
+
+/* Center Shift Light Bar */
+.shift-lights-container {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: #0a0a0a;
+  padding: 6px 10px;
+  border: 1px solid #201f1f;
+  border-radius: var(--radius-sm);
+}
+
+.shift-led {
+  width: 14px;
+  height: 8px;
+  background: #1e1e1e;
+  border-radius: 1px;
+  transition: all 0.08s ease;
+}
+
+.shift-led.green.on {
+  background: var(--secondary);
+  box-shadow: 0 0 10px var(--secondary);
+}
+
+.shift-led.red.on {
+  background: var(--primary-container);
+  box-shadow: 0 0 12px var(--primary-container);
+}
+
+.shift-led.blue.on {
+  background: #3b82f6;
+  box-shadow: 0 0 12px #3b82f6;
+}
+
+.shift-led.flash.on {
+  animation: flash-strobe 0.12s infinite;
+}
+
+@keyframes flash-strobe {
+  0%, 100% { opacity: 1; filter: brightness(1.6); }
+  50% { opacity: 0.2; }
+}
+
+.hud-header-right {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.mode-selector {
+  display: flex;
+  background: var(--surface-container-lowest);
+  padding: 3px;
+  border: 1px solid var(--border-neutral);
+  border-radius: var(--radius-default);
+}
+
+.mode-btn {
+  background: transparent;
+  border: none;
+  outline: none;
+  font-family: var(--font-ui);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: #888;
+  padding: 5px 12px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.mode-btn:hover {
+  color: var(--text-white);
+}
+
+.mode-btn.active {
+  background: var(--surface-container-high);
+  color: var(--text-white);
+  border: 1px solid #444;
+  box-shadow: inset 0 0 6px rgba(255, 255, 255, 0.08);
+}
+
+.sim-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.icon-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--surface-container);
+  border: 1px solid var(--border-neutral);
+  border-radius: var(--radius-default);
+  padding: 6px 12px;
+  color: var(--on-surface);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.icon-btn:hover {
+  border-color: #555;
+  background: var(--surface-container-high);
+}
+
+.icon-btn.primary-action {
+  background: rgba(225, 6, 0, 0.12);
+  border-color: var(--primary-container);
+  color: #fff;
+}
+
+.icon-btn.primary-action:hover {
+  background: var(--primary-container);
+}
+
+.comm-indicator {
+  width: 7px;
+  height: 7px;
+  border-radius: var(--radius-full);
+  background: var(--secondary);
+  box-shadow: 0 0 6px var(--secondary);
+}
+
+/* ==========================================================================
+   12-COLUMN FLUID GRID LAYOUT
+   ========================================================================== */
+
+.grid-workspace {
+  display: grid;
+  grid-template-columns: 3.2fr 5.6fr 3.2fr;
+  gap: var(--gutter);
+  padding: var(--margin);
+  max-width: 1920px;
+  margin: 0 auto;
+}
+
+.grid-col {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gutter);
+}
+
+/* Modular Panels */
+.tech-panel {
+  background: var(--panel-bg-glass);
+  backdrop-filter: blur(8px);
+  border: 1px solid var(--border-neutral);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
+  transition: border-color 0.2s ease;
+}
+
+.tech-panel:hover {
+  border-color: #353534;
+}
+
+/* Panel Header & Strip Accents */
+.panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  background: var(--surface-container-lowest);
+  border-bottom: 1px solid var(--border-neutral);
+  position: relative;
+}
+
+.panel-header::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+}
+
+.status-strip-red::before {
+  background: var(--primary-container);
+  box-shadow: 0 0 6px var(--primary-container);
+}
+
+.status-strip-green::before {
+  background: var(--secondary);
+  box-shadow: 0 0 6px var(--secondary);
+}
+
+.status-strip-amber::before {
+  background: var(--tertiary);
+  box-shadow: 0 0 6px var(--tertiary);
+}
+
+.panel-title-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.panel-tag {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 700;
+  color: #666;
+  background: #181818;
+  padding: 1px 4px;
+  border-radius: var(--radius-sm);
+}
+
+.panel-title {
+  font-family: var(--font-ui);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: var(--text-white);
+  text-transform: uppercase;
+}
+
+.badge-status {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: var(--radius-sm);
+  background: rgba(65, 240, 62, 0.1);
+  color: var(--secondary);
+  border: 1px solid rgba(65, 240, 62, 0.3);
+}
+
+.panel-body {
+  padding: var(--panel-padding);
+}
+
+/* ==========================================================================
+   MODULE 1: POWERTRAIN & TACHOMETER
+   ========================================================================== */
+
+.gauge-hero-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+  background: #0f0f0f;
+  padding: 10px 14px;
+  border: 1px solid #201f1f;
+  border-radius: var(--radius-default);
+}
+
+.gear-display-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 72px;
+  height: 72px;
+  background: var(--surface-container-high);
+  border: 2px solid var(--border-neutral);
+  border-radius: var(--radius-default);
+}
+
+.gear-label {
+  font-family: var(--font-ui);
+  font-size: 9px;
+  font-weight: 700;
+  color: #777;
+  letter-spacing: 0.05em;
+}
+
+.gear-val {
+  font-family: var(--font-mono);
+  font-size: 34px;
+  font-weight: 800;
+  color: var(--text-white);
+  line-height: 1;
+}
+
+.gear-suggested {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  color: var(--secondary);
+}
+
+.speed-readout-box {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.speed-main {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
+
+.speed-num {
+  font-family: var(--font-mono);
+  font-size: 48px;
+  font-weight: 800;
+  color: var(--text-white);
+  line-height: 1;
+  letter-spacing: -0.04em;
+}
+
+.speed-unit {
+  font-family: var(--font-ui);
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--primary-container);
+}
+
+.speed-meta {
+  display: flex;
+  gap: 12px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: #888;
+  margin-top: 4px;
+}
+
+.tach-canvas-container {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  margin: 6px 0;
+}
+
+#tachometer-canvas {
+  width: 100%;
+  height: auto;
+  max-height: 115px;
+}
+
+.tach-val-overlay {
+  position: absolute;
+  bottom: 8px;
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+}
+
+.tach-num {
+  font-family: var(--font-mono);
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--text-white);
+  letter-spacing: -0.02em;
+}
+
+.tach-unit {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: #777;
+}
+
+/* Pedal Inputs */
+.pedal-inputs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-top: 8px;
+  background: #0f0f0f;
+  padding: 10px;
+  border-radius: var(--radius-default);
+  border: 1px solid #1c1c1c;
+}
+
+.pedal-label-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  margin-bottom: 4px;
+  color: #888;
+}
+
+.pedal-progress-track {
+  height: 8px;
+  background: #201f1f;
+  border-radius: 1px;
+  overflow: hidden;
+}
+
+.pedal-fill {
+  height: 100%;
+  transition: width 0.05s linear;
+}
+
+.fill-throttle {
+  background: linear-gradient(90deg, #05d31e, #41f03e);
+  box-shadow: 0 0 8px rgba(65, 240, 62, 0.4);
+}
+
+.fill-brake {
+  background: linear-gradient(90deg, #c00500, #e10600);
+  box-shadow: 0 0 8px rgba(225, 6, 0, 0.4);
+}
+
+/* ==========================================================================
+   MODULE 2: ENERGY, FUEL & CHASSIS CONTROLS
+   ========================================================================== */
+
+.segmented-gauge-group {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.segmented-gauge {
+  background: #0f0f0f;
+  padding: 10px;
+  border: 1px solid #1c1c1c;
+  border-radius: var(--radius-default);
+}
+
+.seg-info {
+  display: flex;
+  justify-content: space-between;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  color: #888;
+  margin-bottom: 6px;
+}
+
+.seg-bars {
+  display: grid;
+  grid-template-columns: repeat(16, 1fr);
+  gap: 3px;
+  height: 14px;
+  margin-bottom: 6px;
+}
+
+.seg-block {
+  background: #252525;
+  border-radius: 1px;
+  transition: background 0.1s ease;
+}
+
+.seg-block.active-cyan {
+  background: var(--text-cyan);
+  box-shadow: 0 0 4px var(--text-cyan);
+}
+
+.seg-block.active-amber {
+  background: var(--tertiary);
+  box-shadow: 0 0 4px var(--tertiary);
+}
+
+.seg-sub {
+  display: flex;
+  justify-content: space-between;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: #666;
+}
+
+.chassis-quick-dial {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.dial-item {
+  background: #0e0e0e;
+  border: 1px solid #222;
+  border-radius: var(--radius-default);
+  padding: 8px 6px;
+  text-align: center;
+}
+
+.dial-lbl {
+  display: block;
+  font-family: var(--font-ui);
+  font-size: 9px;
+  font-weight: 700;
+  color: #666;
+  letter-spacing: 0.05em;
+  margin-bottom: 4px;
+}
+
+.dial-adjuster {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.step-btn {
+  background: #201f1f;
+  border: 1px solid #333;
+  color: var(--text-white);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 700;
+  width: 22px;
+  height: 22px;
+  line-height: 20px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all 0.1s ease;
+}
+
+.step-btn:hover {
+  background: var(--primary-container);
+  border-color: var(--primary-container);
+}
+
+.dial-val {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-white);
+}
+
+/* ==========================================================================
+   MODULE 3: TIMING & DELTA ANALYSIS
+   ========================================================================== */
+
+.lap-delta-banner {
+  display: grid;
+  grid-template-columns: 1.2fr 2fr;
+  gap: 16px;
+  align-items: center;
+}
+
+.live-delta-block {
+  background: #0e0e0e;
+  border: 1px solid #222;
+  border-radius: var(--radius-default);
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+}
+
+.delta-label {
+  font-family: var(--font-ui);
+  font-size: 9px;
+  font-weight: 700;
+  color: #777;
+  letter-spacing: 0.05em;
+  margin-bottom: 4px;
+}
+
+.delta-display {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+}
+
+.delta-sign {
+  font-family: var(--font-mono);
+  font-size: 32px;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.delta-val {
+  font-family: var(--font-mono);
+  font-size: 36px;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.04em;
+}
+
+.delta-unit {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: #777;
+}
+
+.sector-splits-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+.sector-box {
+  background: #0e0e0e;
+  border: 1px solid #222;
+  border-radius: var(--radius-default);
+  padding: 8px 10px;
+  position: relative;
+  overflow: hidden;
+}
+
+.sector-box.purple { border-left: 3px solid var(--text-purple); }
+.sector-box.green { border-left: 3px solid var(--secondary); }
+.sector-box.active { border-left: 3px solid var(--tertiary); }
+
+.sector-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-family: var(--font-ui);
+  font-size: 9px;
+  font-weight: 700;
+  color: #777;
+  margin-bottom: 4px;
+}
+
+.sector-tag {
+  font-family: var(--font-mono);
+  font-size: 8px;
+  padding: 1px 3px;
+  border-radius: 2px;
+  background: #1c1b1b;
+  color: var(--text-white);
+}
+
+.sector-tag.blink {
+  background: rgba(255, 186, 32, 0.2);
+  color: var(--tertiary);
+  animation: pulse-glow 1s infinite;
+}
+
+.sector-time {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text-white);
+  line-height: 1.1;
+}
+
+.sector-delta {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  margin-top: 2px;
+}
+
+/* ==========================================================================
+   MODULE 4: LIVE TELEMETRY OSCILLOSCOPE TRACE
+   ========================================================================== */
+
+.graph-legend {
+  display: flex;
+  gap: 12px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: #aaa;
+}
+
+.dot-swatch {
+  width: 7px;
+  height: 7px;
+  border-radius: var(--radius-full);
+}
+
+.speed-color { background: #38bdf8; box-shadow: 0 0 4px #38bdf8; }
+.throttle-color { background: #41f03e; box-shadow: 0 0 4px #41f03e; }
+.brake-color { background: #e10600; box-shadow: 0 0 4px #e10600; }
+.steer-color { background: #c084fc; box-shadow: 0 0 4px #c084fc; }
+
+.canvas-wrapper {
+  position: relative;
+  width: 100%;
+  height: 220px;
+  background: #080808;
+  border: 1px solid #1a1a1a;
+  border-radius: var(--radius-default);
+  overflow: hidden;
+}
+
+#telemetry-chart-canvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.graph-grid-ticks {
+  position: absolute;
+  right: 6px;
+  top: 0;
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  pointer-events: none;
+  font-family: var(--font-mono);
+  font-size: 9px;
+  color: #444;
+  padding: 4px 0;
+}
+
+.graph-scrubber-line {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: rgba(255, 255, 255, 0.4);
+  pointer-events: none;
+  left: 90%;
+  box-shadow: 0 0 6px #fff;
+}
+
+.graph-footer-metrics {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  margin-top: 8px;
+  background: #0e0e0e;
+  padding: 8px 12px;
+  border-radius: var(--radius-default);
+  border: 1px solid #1c1c1c;
+}
+
+.g-metric {
+  display: flex;
+  flex-direction: column;
+}
+
+.g-metric .lbl {
+  font-family: var(--font-ui);
+  font-size: 9px;
+  font-weight: 700;
+  color: #666;
+  letter-spacing: 0.05em;
+}
+
+.g-metric .val {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-white);
+}
+
+/* ==========================================================================
+   MODULE 5: THE SILENT CO-DRIVER AI VOICE & ADVISORY
+   ========================================================================== */
+
+.audio-hud-state {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.waveform-pill {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  background: #0e0e0e;
+  padding: 2px 6px;
+  border: 1px solid #282828;
+  border-radius: var(--radius-sm);
+  color: #bbb;
+}
+
+.hud-indicator {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--secondary);
+}
+
+.ai-waveform-container {
+  position: relative;
+  height: 48px;
+  background: #0c0c0c;
+  border: 1px solid #201f1f;
+  border-radius: var(--radius-default);
+  margin-bottom: 10px;
+  overflow: hidden;
+}
+
+#waveform-canvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.ai-status-overlay {
+  position: absolute;
+  top: 4px;
+  left: 8px;
+  right: 8px;
+  display: flex;
+  justify-content: space-between;
+  pointer-events: none;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: #777;
+}
+
+.tactical-log-stream {
+  height: 140px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding-right: 4px;
+}
+
+.tactical-log-stream::-webkit-scrollbar {
+  width: 4px;
+}
+.tactical-log-stream::-webkit-scrollbar-thumb {
+  background: #333;
+  border-radius: 2px;
+}
+
+.log-entry {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  background: #0e0e0e;
+  border-left: 2px solid var(--border-neutral);
+  padding: 6px 10px;
+  border-radius: 0 var(--radius-default) var(--radius-default) 0;
+  font-size: 12px;
+  animation: slide-in-log 0.2s ease-out;
+}
+
+@keyframes slide-in-log {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.log-entry.priority-high {
+  border-left-color: var(--primary-container);
+  background: rgba(225, 6, 0, 0.06);
+}
+
+.log-entry.priority-green {
+  border-left-color: var(--secondary);
+}
+
+.log-entry.priority-amber {
+  border-left-color: var(--tertiary);
+}
+
+.log-time {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: #666;
+  white-space: nowrap;
+}
+
+.log-tag {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: 700;
+  padding: 1px 4px;
+  border-radius: 2px;
+  background: #201f1f;
+  color: #aaa;
+}
+
+.log-msg {
+  color: #ddd;
+  font-family: var(--font-ui);
+  line-height: 1.3;
+}
+
+.driver-radio-prompt-bar {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+  margin-top: 10px;
+}
+
+.radio-prompt-btn {
+  background: #181818;
+  border: 1px solid #2c2c2c;
+  color: #ccc;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 600;
+  padding: 6px 4px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.radio-prompt-btn:hover {
+  background: var(--surface-container-high);
+  color: #fff;
+  border-color: #555;
+}
+
+.radio-prompt-btn:active {
+  background: var(--primary-container);
+  color: #fff;
+  border-color: var(--primary-container);
+}
+
+/* ==========================================================================
+   MODULE 6: TIRE MATRIX & THERMAL CHASSIS MODEL
+   ========================================================================== */
+
+.car-chassis-layout {
+  display: grid;
+  grid-template-columns: 1fr 1.2fr 1fr;
+  grid-template-rows: 1fr 1fr;
+  gap: 10px;
+  align-items: center;
+  background: #0c0c0c;
+  padding: 12px;
+  border: 1px solid #1c1c1c;
+  border-radius: var(--radius-default);
+}
+
+.tire-widget {
+  background: #141414;
+  border: 1px solid #282828;
+  padding: 8px;
+  border-radius: var(--radius-default);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.tire-widget.tl { grid-column: 1; grid-row: 1; }
+.tire-widget.tr { grid-column: 3; grid-row: 1; }
+.tire-widget.bl { grid-column: 1; grid-row: 2; }
+.tire-widget.br { grid-column: 3; grid-row: 2; }
+
+.tire-pos {
+  font-family: var(--font-ui);
+  font-size: 9px;
+  font-weight: 700;
+  color: #777;
+  letter-spacing: 0.05em;
+}
+
+.tire-data-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+
+.t-temp {
+  font-family: var(--font-mono);
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text-white);
+}
+
+.t-psi {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: #888;
+}
+
+.wear-bar {
+  height: 4px;
+  background: #252525;
+  border-radius: 1px;
+  overflow: hidden;
+}
+
+.wear-fill {
+  height: 100%;
+  background: var(--secondary);
+}
+
+.wear-lbl {
+  font-family: var(--font-mono);
+  font-size: 8px;
+  color: #666;
+}
+
+.chassis-silhouette {
+  grid-column: 2;
+  grid-row: 1 / span 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.f1-car-svg-container {
+  width: 90px;
+  height: 140px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.car-wireframe-svg {
+  width: 100%;
+  height: 100%;
+  filter: drop-shadow(0 0 8px rgba(225, 6, 0, 0.2));
+}
+
+.aero-arrow {
+  font-family: var(--font-mono);
+  font-size: 8px;
+  color: #777;
+  letter-spacing: 0.05em;
+}
+
+.brake-temp-readouts {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+  margin-top: 10px;
+}
+
+.b-disc {
+  background: #0e0e0e;
+  border: 1px solid #201f1f;
+  padding: 6px;
+  border-radius: var(--radius-sm);
+  text-align: center;
+}
+
+.b-disc-lbl {
+  display: block;
+  font-family: var(--font-ui);
+  font-size: 8px;
+  font-weight: 700;
+  color: #666;
+}
+
+.b-disc strong {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--tertiary);
+}
+
+/* ==========================================================================
+   MODULE 7: G-METER & BIOMETRICS
+   ========================================================================== */
+
+.g-and-bio-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  align-items: center;
+}
+
+.g-radar-container {
+  position: relative;
+  width: 140px;
+  height: 140px;
+  margin: 0 auto;
+}
+
+#g-radar-canvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.g-readout-center {
+  position: absolute;
+  bottom: 4px;
+  right: 4px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--text-cyan);
+}
+
+.driver-vitals {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.vital-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #0e0e0e;
+  border: 1px solid #1f1f1f;
+  padding: 6px 10px;
+  border-radius: var(--radius-default);
+}
+
+.vital-icon {
+  font-size: 14px;
+}
+
+.pulse-heart {
+  color: var(--primary-container);
+  animation: pulse-heart 1s infinite;
+}
+
+@keyframes pulse-heart {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.25); }
+}
+
+.vital-data {
+  display: flex;
+  flex-direction: column;
+}
+
+.vital-lbl {
+  font-family: var(--font-ui);
+  font-size: 8px;
+  font-weight: 700;
+  color: #666;
+}
+
+.vital-num {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-white);
+}
+
+.pit-strategy-box {
+  margin-top: 12px;
+  background: #0e0e0e;
+  border: 1px solid #222;
+  border-radius: var(--radius-default);
+  padding: 10px;
+}
+
+.strategy-header {
+  display: flex;
+  justify-content: space-between;
+  font-size: 10px;
+  font-weight: 700;
+  margin-bottom: 6px;
+  border-bottom: 1px solid #1f1f1f;
+  padding-bottom: 4px;
+}
+
+.strat-title {
+  color: #aaa;
+  letter-spacing: 0.05em;
+}
+
+.strategy-gap-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  text-align: center;
+}
+
+.gap-lbl {
+  display: block;
+  font-family: var(--font-ui);
+  font-size: 8px;
+  color: #666;
+}
+
+.gap-val {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--text-white);
+}
+
+/* ==========================================================================
+   FOOTER TELEMETRY TICKER
+   ========================================================================== */
+
+.hud-footer {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 8px var(--margin);
+  background: #0a0a0a;
+  border-top: 1px solid var(--border-neutral);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  overflow-x: auto;
+  white-space: nowrap;
+}
+
+.footer-block {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
+
+.f-lbl {
+  color: #666;
+  font-size: 10px;
+}
+
+.f-val {
+  color: #ccc;
+  font-weight: 600;
+}
+
+.status-right {
+  margin-left: auto;
+}
+
+.link-pulse {
+  color: var(--secondary);
+}
+
+/* ==========================================================================
+   RESPONSIVE DESIGN (Cockpit Scaling & Mobile Fallback)
+   ========================================================================== */
+
+@media (max-width: 1200px) {
+  .grid-workspace {
+    grid-template-columns: 1fr 1fr;
+  }
+  .col-center {
+    grid-column: 1 / span 2;
+    order: -1;
+  }
+}
+
+@media (max-width: 768px) {
+  .grid-workspace {
+    grid-template-columns: 1fr;
+    padding: 12px;
+    gap: 12px;
+  }
+  .col-center {
+    grid-column: auto;
+    order: 0;
+  }
+  .hide-mobile {
+    display: none !important;
+  }
+  .hud-header {
+    padding: 0 12px;
+    height: auto;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding-top: 8px;
+    padding-bottom: 8px;
+  }
+  .hud-header-right {
+    width: 100%;
+    justify-content: space-between;
+  }
+  .lap-delta-banner {
+    grid-template-columns: 1fr;
+  }
+  .speed-num {
+    font-size: 38px;
+  }
+}
