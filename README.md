@@ -35,9 +35,3 @@ The Silent Co-Driver is a cutting-edge web application designed for high-perform
 2.  **Open `index.html`**: Simply open the `index.html` file in your web browser. No server setup is required for basic functionality.
     -   Navigate to `race_radio.html` and `analysis_result.html` via the navigation links within the application.
 
-## File Structure
--   `index.html`: The main live cockpit dashboard.
--   `race_radio.html`: The interface for analyzing race radio communications.
--   `analysis_result.html`: Displays the AI debrief and analysis results.
--   `app.js`: Contains the core JavaScript logic for telemetry simulation, canvas rendering, and UI interactions.
--   `style.css`: Custom CSS for the application's design system and telemetry styles.
