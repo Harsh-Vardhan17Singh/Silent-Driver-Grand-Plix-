@@ -26,12 +26,5 @@ The Silent Co-Driver is a cutting-edge web application designed for high-perform
 -   **Google Fonts**: Inter and JetBrains Mono for typography.
 -   **Material Symbols Outlined**: For iconography.
 
-## How to Run
-1.  **Clone the repository**:
-    ```bash
-    git clone https://github.com/your-username/Silent-Driver-Grand-Plix-.git
-    cd Silent-Driver-Grand-Plix-
-    ```
-2.  **Open `index.html`**: Simply open the `index.html` file in your web browser. No server setup is required for basic functionality.
-    -   Navigate to `race_radio.html` and `analysis_result.html` via the navigation links within the application.
+
 
